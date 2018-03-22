@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -7,7 +8,7 @@ using Pose.Helpers;
 
 namespace Pose
 {
-    public partial class Shim
+    public partial class Shim : IShims
     {
         private MethodBase _original;
         private ShimDelegate _replacement;
@@ -83,6 +84,11 @@ namespace Pose
             ShimHelper.ValidateReplacementMethodSignature(this._original, replacement.Method, _instance?.GetType() ?? _type, _setter);
             _replacement = new ShimDelegate(replacement);
             return this;
+        }
+
+        public IEnumerable<Shim> GetShims()
+        {
+            yield return this;
         }
     }
 }

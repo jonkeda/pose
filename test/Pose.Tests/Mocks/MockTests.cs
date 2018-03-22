@@ -13,10 +13,9 @@ namespace Pose.Tests.Mocks
 
             public void DoSomething() => Console.WriteLine("doing someting");
             public void DoNothing() => Console.WriteLine("doing nothing");
-
         }
 
-        public static class ShimMyClass
+        public  class ShimMyClass
         {
             public static int MyProperty
             {
@@ -33,7 +32,7 @@ namespace Pose.Tests.Mocks
         [TestMethod]
         public void MockMethod()
         {
-            Mock mock = new Mock(typeof(MyClass), typeof(ShimMyClass));
+            Mock mock = new Mock<MyClass, ShimMyClass>();
 
             new MyClass().DoSomething();
             Console.WriteLine(new MyClass().MyProperty);
@@ -48,7 +47,7 @@ namespace Pose.Tests.Mocks
 
                     Console.WriteLine(new MyClass().MyProperty);
 
-                }, mock.Shims);
+                }, mock);
 
             new MyClass().DoSomething();
             Console.WriteLine(new MyClass().MyProperty);

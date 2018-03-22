@@ -1,11 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Pose.Helpers;
 
 namespace Pose
 {
-    public class Mock
+    public class Mock<TO, TM> : Mock
+    {
+        public Mock() : base(typeof(TO), typeof(TM))
+        {
+        }
+    }
+
+    public class Mock : IShims
     {
         public Mock(Type originalType, Type mockType)
         {
@@ -39,10 +47,12 @@ namespace Pose
 
         private readonly ShimCollection _shims = new ShimCollection();
 
-        public Shim[] Shims
+        public IEnumerable<Shim> GetShims()
         {
-            get { return _shims.ToArray(); }
+            foreach (Shim shim in _shims)
+            {
+                yield return shim;
+            }
         }
-
     }
 }
