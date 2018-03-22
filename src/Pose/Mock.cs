@@ -27,10 +27,6 @@ namespace Pose
     public class ShimCollection : Collection<Shim>
     { }
 
-    /// <summary>
-    /// 
-    /// https://codereview.stackexchange.com/questions/1070/generic-advanced-delegate-createdelegate-using-expression-trees
-    /// </summary>
     public class Mock
     {
         public Mock(Type originalType, Type mockType)
@@ -63,7 +59,7 @@ namespace Pose
             return originalType.GetMethod(mockMethod.Name, types);
         }
 
-        private ShimCollection _shims = new ShimCollection();
+        private readonly ShimCollection _shims = new ShimCollection();
 
         public Shim[] Shims
         {
