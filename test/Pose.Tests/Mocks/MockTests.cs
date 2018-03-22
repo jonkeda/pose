@@ -2,7 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Pose;
 
-namespace Pose.Tests.Classes
+namespace Pose.Tests.Mocks
 {
     [TestClass]
     public class MockTests
@@ -18,13 +18,14 @@ namespace Pose.Tests.Classes
 
         public static class ShimMyClass
         {
-            //public static int MyProperty
-            //{
-            //    get { return 100; }
-            //    set { }
-            //}
+            public static int MyProperty
+            {
+                get { return 100; }
+                set { }
+            }
 
             public static void DoSomething() => Console.WriteLine("doing someting else");
+
             public static void DoMore() => Console.WriteLine("doing more");
 
         }
@@ -34,17 +35,23 @@ namespace Pose.Tests.Classes
         {
             Mock mock = new Mock(typeof(MyClass), typeof(ShimMyClass));
 
-            //Mock mock = new Mock().Replace<MyClass, ShimMyClass>();
             new MyClass().DoSomething();
+            Console.WriteLine(new MyClass().MyProperty);
 
             PoseContext.Isolate(() =>
                 {
                     // test it
+                    new MyClass().DoNothing();
+
+                    // test it
                     new MyClass().DoSomething();
+
+                    Console.WriteLine(new MyClass().MyProperty);
 
                 }, mock.Shims);
 
             new MyClass().DoSomething();
+            Console.WriteLine(new MyClass().MyProperty);
         }
 
         [TestMethod]

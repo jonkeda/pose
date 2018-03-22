@@ -1,32 +1,10 @@
 ﻿using System;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
+using Pose.Helpers;
 
 namespace Pose
 {
-    public class ShimDelegate
-    {
-        public ShimDelegate(Delegate replacement)
-        {
-            Target = replacement.Target;
-            Method = replacement.Method;
-        }
-
-        public ShimDelegate(object target, MethodInfo method)
-        {
-            Target = target;
-            Method = method;
-        }
-
-        public object Target { get; }
-
-        public MethodInfo Method { get; }
-    }
-
-    public class ShimCollection : Collection<Shim>
-    { }
-
     public class Mock
     {
         public Mock(Type originalType, Type mockType)
