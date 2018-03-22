@@ -10,7 +10,7 @@ namespace Pose
     public partial class Shim
     {
         private MethodBase _original;
-        private Delegate _replacement;
+        private ShimDelegate _replacement;
         private Object _instance;
         private Type _type;
         private bool _setter;
@@ -23,7 +23,7 @@ namespace Pose
             }
         }
 
-        internal Delegate Replacement
+        internal ShimDelegate Replacement
         {
             get
             {
@@ -56,6 +56,16 @@ namespace Pose
                 _instance = instanceOrType;
         }
 
+        private Shim(MethodBase original, object instanceOrType, object target, MethodInfo mockMethod) : this(original, instanceOrType)
+        {
+            _replacement = new ShimDelegate(target, mockMethod);
+        }
+
+        public static Shim Create(MethodBase original, object instanceOrType, object target, MethodInfo mockMethod)
+        {
+            return new Shim(original, instanceOrType, target, mockMethod);
+        }
+
         public static Shim Replace(Expression<Action> expression, bool setter = false)
             => ReplaceImpl(expression, setter);
 
@@ -70,8 +80,8 @@ namespace Pose
 
         private Shim WithImpl(Delegate replacement)
         {
-            _replacement = replacement;
-            ShimHelper.ValidateReplacementMethodSignature(this._original, this._replacement.Method, _instance?.GetType() ?? _type, _setter);
+            ShimHelper.ValidateReplacementMethodSignature(this._original, replacement.Method, _instance?.GetType() ?? _type, _setter);
+            _replacement = new ShimDelegate(replacement);
             return this;
         }
     }
