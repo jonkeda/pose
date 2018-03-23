@@ -57,11 +57,11 @@ namespace Pose.Tests
             Shim shim1 = Shim.Replace(() => shimTests.TestReplace()).With(actionInstance);
 
             Assert.AreEqual(typeof(Console).GetMethod("WriteLine", Type.EmptyTypes), shim.Original);
-            Assert.AreEqual(action, shim.Replacement);
+            Assert.AreEqual(action.Method, shim.Replacement.Method);
 
             Assert.AreEqual(typeof(ShimTests).GetMethod("TestReplace"), shim1.Original);
             Assert.AreSame(shimTests, shim1.Instance);
-            Assert.AreEqual(actionInstance, shim1.Replacement);
+            Assert.AreEqual(actionInstance.Method, shim1.Replacement.Method);
         }
 
         [TestMethod]

@@ -6,37 +6,83 @@ using Pose.Helpers;
 
 namespace Pose
 {
-    public class Mock<TO, TM> : Mock
-    {
-        public Mock() : base(typeof(TO), typeof(TM))
-        {
-        }
-    }
-
     public class Mock : IShims
     {
-        public Mock(Type originalType, Type mockType)
+        public static Mock It(Type mockType)
         {
-            CreateShims(originalType, mockType);
+            MockAttribute attr = mockType.GetCustomAttribute<MockAttribute>();
+            if (attr == null)
+            {
+                throw new ArgumentException(nameof(mockType), "MockAttribute is missing.");
+            }
+            return new Mock(attr.OriginalType, mockType);
         }
 
-        private void CreateShims(Type originalType, Type mockType)
+        public static Mock It(Type originalType, Type mockType)
         {
-            CreateMethodShims(originalType, mockType);
+            return new Mock(originalType, mockType);
         }
 
-        private void CreateMethodShims(Type originalType, Type mockType)
+        public static Mock It<TO, TM>()
+        {
+            return new Mock(typeof(TO), typeof(TM));
+        }
+
+        public static Mock It<TM>(object originalValue)
+        {
+            if (originalValue == null)
+            {
+                throw new ArgumentException(nameof(originalValue));
+            }
+            return new Mock(originalValue, typeof(TM));
+        }
+
+        public static Mock It(object originalValue, Type mockType)
+        {
+            if (originalValue == null)
+            {
+                throw new ArgumentException(nameof(originalValue));
+            }
+            return new Mock(originalValue, mockType);
+        }
+
+        private Mock(Type originalType, Type mockType)
+        {
+            CreateMethodShims(originalType, mockType, null);
+        }
+
+        private Mock(object originalValue, Type mockType)
+        {
+            Type originalType = originalValue.GetType();
+
+            CreateMethodShims(originalType, mockType, originalValue);
+        }
+
+
+        private void CreateMethodShims(Type originalType, Type mockType, object target)
         {
             foreach (MethodInfo mockMethod in mockType.GetMethods(BindingFlags.Public | BindingFlags.Static))
             {
-                MethodInfo originalMethod = FindMethodLike(originalType, mockMethod);
+                MethodBase originalMethod;
+                if (mockMethod.Name == originalType.Name)
+                {
+                    originalMethod = FindConstructorLike(originalType, mockMethod);
+                }
+                else
+                {
+                    originalMethod = FindMethodLike(originalType, mockMethod);
+                }
                 if (originalMethod != null)
                 {
-                    object target = null;
-                    _shims.Add(Shim.Create(originalMethod, originalType, null, mockMethod));
+                    _shims.Add(Shim.Create(originalMethod, originalType, target, mockMethod));
                 }
             }
-            
+        }
+
+        private ConstructorInfo FindConstructorLike(Type originalType, MethodInfo mockMethod)
+        {
+            Type[] types = mockMethod.GetParameters().Select(p => p.ParameterType).ToArray();
+            return originalType.GetConstructor(types);
         }
 
         private MethodInfo FindMethodLike(Type originalType, MethodInfo mockMethod)

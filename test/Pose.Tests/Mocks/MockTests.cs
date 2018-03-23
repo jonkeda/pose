@@ -4,18 +4,25 @@ using Pose;
 
 namespace Pose.Tests.Mocks
 {
+    //https://www.codeproject.com/Articles/414195/Generating-Assemblies-at-runtime-using-IL-emit
+
+
     [TestClass]
     public class MockTests
     {
         public class MyClass
         {
             public int MyProperty { get; set; }
-
             public void DoSomething() => Console.WriteLine("doing someting");
             public void DoNothing() => Console.WriteLine("doing nothing");
+            public string ReturnSomething() => "something";
+            public string ReturnValue(string value) => value;
+            public int ReturnValue(int value) => value;
+
+            public static string StaticReturnValue(string value) => value;
         }
 
-        public  class ShimMyClass
+        public class ShimMyClass
         {
             public static int MyProperty
             {
@@ -24,64 +31,35 @@ namespace Pose.Tests.Mocks
             }
 
             public static void DoSomething() => Console.WriteLine("doing someting else");
-
             public static void DoMore() => Console.WriteLine("doing more");
-
+            public static string ReturnSomething() => "something else";
+            public static string ReturnValue(string value) => "fixed value";
+            public static int ReturnValue(int value) => 88;
+            public static string StaticReturnValue(string value) => "static fixed value";
         }
 
         [TestMethod]
-        public void MockMethod()
+        public void MockMethods()
         {
-            Mock mock = new Mock<MyClass, ShimMyClass>();
+            Mock mock = Mock.It<MyClass, ShimMyClass>();
 
             new MyClass().DoSomething();
             Console.WriteLine(new MyClass().MyProperty);
 
-            PoseContext.Isolate(() =>
-                {
-                    // test it
-                    new MyClass().DoNothing();
-
-                    // test it
-                    new MyClass().DoSomething();
-
-                    Console.WriteLine(new MyClass().MyProperty);
-
-                }, mock);
-
-            new MyClass().DoSomething();
-            Console.WriteLine(new MyClass().MyProperty);
-        }
-
-        [TestMethod]
-        public void ShimExample()
-        {
-            Shim classShim = Shim.Replace(() => Is.A<MyClass>().DoSomething()).With(
-                delegate (MyClass @this) { Console.WriteLine("doing someting else"); });
-
-            Shim consoleShim = Shim.Replace(() => Console.WriteLine(Is.A<string>())).With(
-                delegate (string s) { Console.WriteLine("Hijacked: {0}", s); });
-
-            // This block executes immediately
             PoseContext.Isolate(() =>
             {
-                // All code that executes within this block
-                // is isolated and shimmed methods are replaced
-
-                // Outputs "Hijacked: Hello World!"
-                Console.WriteLine("Hello World!");
-
-                //// Outputs "4/4/04 12:00:00 AM"
-                //Console.WriteLine(DateTime.Now);
-
-                //// Outputs "doing someting else"
+                new MyClass().DoNothing();
                 new MyClass().DoSomething();
+                Console.WriteLine(new MyClass().MyProperty);
+                Console.WriteLine(new MyClass().ReturnSomething());
+                Console.WriteLine(new MyClass().ReturnValue("a value"));
+                Console.WriteLine(new MyClass().ReturnValue(22));
+                Console.WriteLine(MyClass.StaticReturnValue("a static value"));
 
-                //// Outputs "doing someting else with myClass"
-                //myClass.DoSomething();
+            }, mock);
 
-            }, consoleShim, classShim); //, dateTimeShim, classPropShim, classShim, myClassShim, structShim);
+            new MyClass().DoSomething();
+            Console.WriteLine(new MyClass().MyProperty);
         }
-
     }
 }
