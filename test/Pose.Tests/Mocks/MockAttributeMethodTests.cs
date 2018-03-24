@@ -5,7 +5,7 @@ using Pose;
 namespace Pose.Tests.Mocks
 {
     [TestClass]
-    public class MockMethodTests
+    public class MockAttributeMethodTests
     {
         public class MyClass
         {
@@ -15,6 +15,7 @@ namespace Pose.Tests.Mocks
             public int ReturnValue(int value) => value;
         }
 
+        [Mock(typeof(MyClass))]
         public  class ShimMyClass
         {
             public static int MyProperty
@@ -30,7 +31,7 @@ namespace Pose.Tests.Mocks
         [TestMethod]
         public void MockMethod()
         {
-            Mock mock = Mock.It<MyClass, ShimMyClass>();
+            Mock mock = Mock.It<ShimMyClass>();
 
             MyClass myClass = new MyClass();
 

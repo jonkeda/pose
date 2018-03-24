@@ -8,6 +8,11 @@ namespace Pose
 {
     public class Mock : IShims
     {
+        public static Mock It<TM>()
+        {
+            return It(typeof(TM));
+        }
+
         public static Mock It(Type mockType)
         {
             MockAttribute attr = mockType.GetCustomAttribute<MockAttribute>();

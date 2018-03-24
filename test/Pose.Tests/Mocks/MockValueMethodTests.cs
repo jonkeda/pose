@@ -5,7 +5,7 @@ using Pose;
 namespace Pose.Tests.Mocks
 {
     [TestClass]
-    public class MockMethodTests
+    public class MockValueMethodTests
     {
         public class MyClass
         {
@@ -15,6 +15,7 @@ namespace Pose.Tests.Mocks
             public int ReturnValue(int value) => value;
         }
 
+        [Mock(typeof(MyClass))]
         public  class ShimMyClass
         {
             public static int MyProperty
@@ -30,7 +31,6 @@ namespace Pose.Tests.Mocks
         [TestMethod]
         public void MockMethod()
         {
-            Mock mock = Mock.It<MyClass, ShimMyClass>();
 
             MyClass myClass = new MyClass();
 
@@ -38,6 +38,10 @@ namespace Pose.Tests.Mocks
             Assert.AreEqual(myClass.ReturnSomething(), "something");
             Assert.AreEqual(myClass.ReturnValue("value"), "value");
             Assert.AreEqual(myClass.ReturnValue(9), 9);
+
+            MyClass myClassV = new MyClass();
+            Mock mock = Mock.It<ShimMyClass>(myClassV);
+            
 
             PoseContext.Isolate(() => 
                 {
