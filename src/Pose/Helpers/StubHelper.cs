@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -49,7 +48,14 @@ namespace Pose.Helpers
         {
             BindingFlags bindingFlags = BindingFlags.Instance | (methodInfo.IsPublic ? BindingFlags.Public : BindingFlags.NonPublic);
             Type[] types = methodInfo.GetParameters().Select(p => p.ParameterType).ToArray();
-            return type.GetMethod(methodInfo.Name, bindingFlags, null, types, null);
+            var method = type.GetMethod(methodInfo.Name, bindingFlags, null, types, null);
+            if (method == null)
+            {
+                MethodInfo[] methods = type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                MethodInfo foundMethod = methods.FirstOrDefault(i => i.Name.EndsWith(methodInfo.Name));
+                return foundMethod;
+            }
+            return method;
         }
 
         public static Module GetOwningModule() => typeof(StubHelper).Module;
@@ -65,6 +71,16 @@ namespace Pose.Helpers
                         || (shim.Original.IsVirtual && !method.IsOverride()))
                 {
                     return $"{shim.Original.ToString()}" == $"{method.ToString()}";
+                }
+            }
+
+            if (shim.Type.IsAssignableFrom(type))
+            {
+                if ((shim.Original.IsAbstract || !shim.Original.IsVirtual)
+                    || (shim.Original.IsVirtual && !method.IsOverride()))
+                {
+                    return $"{shim.Original.ToString()}" == $"{method.ToString()}"
+                        || method.Name.EndsWith(shim.Original.Name) ;
                 }
             }
 

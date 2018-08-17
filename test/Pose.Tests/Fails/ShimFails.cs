@@ -12,7 +12,7 @@ namespace Pose.Tests.Fails
         }
 
         [TestMethod]
-        [ExpectedException(typeof(NullReferenceException))]
+     //   [ExpectedException(typeof(NullReferenceException))]
         public void ShimConstructor()
         {
             Shim ctorShim = Shim.Replace(() => new MyClass())
